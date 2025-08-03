@@ -37,7 +37,12 @@ while True:
                 # Create a bullet at the current player position
                 bullet_x = player_x + player_width // 2 - bullet_width // 2
                 bullet_y = player_y
-                bullets.append(pygame.Rect(bullet_x, bullet_y, bullet_width, bullet_height))
+                bullets.append(
+                    pygame.Rect(
+                        bullet_x, bullet_y,
+                        bullet_width, bullet_height
+                    )
+                )
 
     # Handle player movement
     keys = pygame.key.get_pressed()
