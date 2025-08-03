@@ -35,21 +35,11 @@ while True:
             pygame.quit()
             sys.exit()
 
-    # Handle player movement
-    keys = pygame.key.get_pressed()
-    if keys[pygame.K_LEFT] and player_x > 0:
-        player_x -= player_speed
-    if keys[pygame.K_RIGHT] and player_x < screen_width - player_width:
-        player_x += player_speed
-
-    # Fill the screen with black
+    # Fill the screen with a color (black in this case)
     screen.fill((0, 0, 0))
-
-    # Draw the player
-    pygame.draw.rect(screen, (0, 128, 255), (player_x, player_y, player_width, player_height))
 
     # Update the display
     pygame.display.flip()
 
-    # Cap the frame rate at 60 FPS
+    # Cap the frame rate at 60 frames per second
     clock.tick(60)
