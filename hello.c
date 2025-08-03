@@ -14,11 +14,10 @@
 
 #include <stdio.h>
 
-int main(int argc, char** argv) {
-  if ( argc == 2 ) {      // why 2?
-    printf("Hello, %s!\n", argv[1]);
+int main(int number_of_words, char** words) {
+  if ( number_of_words == 2 ) {      // why 2?
+    printf("Hello, %s!\n", words[1]);
   } else {
     printf("Hello, %s!\n", "STRANGER");
   }
-  return 0;
-}
+  return 0;}

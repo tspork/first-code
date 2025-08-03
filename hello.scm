@@ -6,15 +6,16 @@
 ;; $ export GUILE_AUTO_COMPILE=0
 ;;
 ;; Run w/ 0 arguments:
-;; $ guile hello-world.scm
+;; $ guile hello.scm
 ;;
 ;; Run w/ 1 argument:
-;; $ guile hello-world.py Tau
+;; $ guile hello.py Tau
 
-(define (main argv)
-  (if (= (length argv) 1)   ;; why 2?
-    (display "Hello, STRANGER! \n")
-    (display (string-append "Hello, " (list-ref argv 1) "! \n")))
+(define (main words)
+  ;; (write words)(newline)(exit 0)
+  (if (= (length words) 2)   ;; why 2?
+    (display (string-append "Hello, " (list-ref words 1) "! \n"))
+    (display "Hello, STRANGER! \n"))
   (exit 0))
 
 (main (command-line))

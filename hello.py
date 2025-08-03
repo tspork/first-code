@@ -10,9 +10,12 @@
 
 import sys
 
-def main(argv):
-    if len(argv) == 2:
-        print(f"Hello, " + argv[1] + "!")
+def length(blah):
+    return len(blah)
+
+def main(words):
+    if length(words) == 2:     # why 2?
+        print("Hello, " + words[1] + "!")
     else:
         print("Hello, STRANGER!")
     sys.exit(0)
