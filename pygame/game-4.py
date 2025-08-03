@@ -68,7 +68,12 @@ while True:
     if current_time - enemy_timer > enemy_spawn_time:
         enemy_x = random.randint(0, screen_width - enemy_width)
         enemy_y = -enemy_height
-        enemies.append(pygame.Rect(enemy_x, enemy_y, enemy_width, enemy_height))
+        enemies.append(
+            pygame.Rect(
+                enemy_x, enemy_y,
+                enemy_width, enemy_height
+            )
+        )
         enemy_timer = current_time
 
     for enemy in enemies:
