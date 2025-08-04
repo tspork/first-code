@@ -1,40 +1,43 @@
-from sprite import Sprite
-from cpu import Program, CPU, V
+from timer import Duration
+from entity import Entity, Duration, V
+from cpu import CPU
 
-class Enemy():
-    def __init__(
-            self,
-            pos: V,
-            vel: V,
-            sprite: Sprite,
-            program: Program,
-        ):
-        self.pos = pos
-        self.vel = vel
-        self.cpu = CPU(self, program)
-        self.sprite = sprite
-        self.update()
+class Enemy(Entity):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # self.player = kwargs['player']
+        # self.programs: list = kwargs['programs']
+        self.cpus: list = [CPU(self, prog) for prog in self.programs]
+        # print(f"cpus={self.cpus!r}")
 
-    def update(self):
-        self.sprite.pos = self.pos
+    def tick(self):
+        for cpu in self.cpus:
+            cpu.tick(self.dt)
+        self.avoid_enemies()
+        # if self.avoid_bullets():
 
-    def tick(self, dt: float):
-        self.cpu.tick(dt)
-        self.update()
+    def tick_cpu(self, dt: Duration):
+        self.tick_pos(dt)
 
-    def cpu_tick(self, dt: float):
-        self.pos += self.vel * dt
+    def think(self):
+        'Change direction to player.'
+        self.move_toward_player()
 
-    def acc(self, a):
-        # print(f"a={a} dp={self.vel}")
-        self.vel += a
+    def avoid_enemies(self):
+        for enemy in self.game.enemies:
+            if enemy.id > self.id:
+                r = self.sprite.width
+                self.repel_from(enemy.pos, r)
 
-    def draw(self, screen):
-        self.sprite.draw(screen)
+    def avoid_bullets(self):
+        # print(f"avoid_bullets: {self}")
+        for bullet in self.game.bullets:
+            # print(f"avoid_bullets: {bullet}")
+            r0 = self.sprite.size.x
+            r1 = r0 * 2
+            if self.avoid_point(bullet.pos, r0, r1):
+                return True
+        return False
 
-    def __str__(self):
-        return self.__repr__()
-
-    def __repr__(self):
-        return f"Enemy({self.p}, {self.dp})"
-
+    def move_toward_player(self):
+        self.move_toward(self.player.pos, 0.5)

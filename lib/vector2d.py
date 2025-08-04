@@ -1,16 +1,19 @@
 # See: https://scipython.com/books/book2/chapter-4-the-core-python-language-ii/examples/a-2d-vector-class/
 
 import math
+from math import pi
 from random import Random
 
+M_PI_PER_DEG = pi / 18.0
+
 def lerp(t, x0, x1):
-    return x0 * (1.0 - t) + x1 * t
+    return x0 * (1 - t) + x1 * t
 
 class Vector2D:
     """A two-dimensional vector with Cartesian coordinates."""
 
-    def __init__(self, x = 0.0, y = 0.0):
-        self.x, self.y = float(x), float(y)
+    def __init__(self, x = 0.0, y = None):
+        self.x, self.y = float(x), float(y if y is not None else x)
 
     def __str__(self):
         """Human-readable string representation of the vector."""
@@ -31,6 +34,9 @@ class Vector2D:
     # Alias the __matmul__ method to dot so we can use a @ b as well as a.dot(b).
     __matmul__ = dot
 
+    def __bool__(self):
+        return not self.x and not self.y
+
     def __sub__(self, other):
         """Vector subtraction."""
         other = Vector2D.coerce(other)
@@ -41,11 +47,10 @@ class Vector2D:
         other = Vector2D.coerce(other)
         return Vector2D(self.x + other.x, self.y + other.y)
 
-    def __mul__(self, scalar):
+    def __mul__(self, other):
         """Multiplication of a vector by a scalar."""
-        if not isinstance(scalar, Vector2D):
-            return Vector2D(self.x * scalar, self.y * scalar)
-        raise NotImplementedError('Can only multiply Vector2D by a scalar')
+        other = Vector2D.coerce(other)
+        return Vector2D(self.x * other.x, self.y * other.y)
 
     def __rmul__(self, scalar):
         """Reflected multiplication so vector * scalar also works."""
@@ -55,9 +60,10 @@ class Vector2D:
         """Negation of the vector (invert through origin.)"""
         return Vector2D(- self.x, - self.y)
 
-    def __truediv__(self, scalar):
+    def __truediv__(self, other):
         """True division of the vector by a scalar."""
-        return Vector2D(self.x / scalar, self.y / scalar)
+        other = Vector2D.coerce(other)
+        return Vector2D(self.x / other.x, self.y / other.y)
 
     def __mod__(self, other):
         """One way to implement modulus operation: for each component."""
@@ -65,8 +71,8 @@ class Vector2D:
         return Vector2D(self.x % other.x, self.y % other.y)
 
     def __abs__(self):
-        """Absolute value (magnitude) of the vector."""
-        return math.sqrt(self.x ** 2 + self.y ** 2)
+        """"""
+        return Vector2D(abs(self.x), abs(self.y))
 
     def distance_to(self, other):
         """The distance between vectors self and other."""
@@ -74,28 +80,43 @@ class Vector2D:
 
     def to_polar(self):
         """Return the vector's components in polar coordinates."""
-        return self.__abs__(), math.atan2(self.y, self.x)
+        return self.norm(), math.atan2(self.y, self.x)
 
     def norm(self):
+        'The norm (length).'
         return math.sqrt(self.x ** 2 + self.y ** 2)
 
-    def normal(self):
+    def normal_and_norm(self):
         norm = self.norm()
         if norm == 0:
-            return self
-        norm = 1 / norm
-        return Vector2D(self.x * norm, self.y * norm)
+            return self, norm
+        return self * (1.0 / norm), norm
 
-    def reflect(self, nn):
+    def normal(self):
+        'The normal vector.'
+        return self.normal_and_norm()[0]
+
+    def reflected(self, nn):
         '''Presume nn is normal.'''
         # nn = n.normal()
         return self - 2 * self.dot(nn) * nn
 
+    def rotated(self, deg):
+        theta = deg * M_PI_PER_DEG
+        cos_theta = math.cos(theta)
+        sin_theta = math.sin(theta)
+        return Vector2D(
+            cos_theta * self.x - sin_theta * self.y,
+            sin_theta * self.x + cos_theta * self.y)
+
     @classmethod
     def coerce(cls, x):
-        if isinstance(x, Vector2D):
+        if isinstance(x, cls):
             return x
-        return Vector2D(x, x)
+        if isinstance(x, (tuple, list)):
+            return cls(*x)
+        # print(f"coerce({x!r})"); jkasldkfjs
+        return cls(x, x)
 
     @classmethod
     def random(cls, x0, x1, rand: Random):
@@ -106,12 +127,26 @@ class Vector2D:
         return cls(x, y)
 
     @classmethod
+    def random_in_circle(cls, rand: Random):
+        while True:
+            p = cls.random(V__1, V_1, rand)
+            if p.norm() < 1.0:
+                return p
+
+    @classmethod
+    def random_on_circle(cls, rand: Random):
+        return cls.random_in_circle(rand).normal()
+
+    @classmethod
     def lerp(cls, t, x0, x1):
         x0 = cls.coerce(x0)
         x1 = cls.coerce(x1)
         return lerp(t, x0, x1)
 
 V = Vector2D
+V_0 = V_ZERO = Vector2D(0.0, 0.0)
+V_1 = V_POS_1 = Vector2D(1.0, 1.0)
+V__1 = V_NEG_1 = Vector2D(-1.0, -1.0)
 
 if __name__ == '__main__':
     v1 = Vector2D(2, 5/3)
