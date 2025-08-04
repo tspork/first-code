@@ -1,5 +1,9 @@
+import math
 from sprite import Sprite, V, V_ZERO
 from timer import Duration
+
+DEGREE_PER_RADIAN = 180 / math.pi
+RADIAN_PER_DEGREE = math.pi / 180
 
 class Entity():
     id = 0
@@ -13,8 +17,11 @@ class Entity():
         self.kwargs = kwargs
         Entity.id += 1
         self.id = Entity.id
-        self.pos: V = pos
-        self.vel: V = vel
+        self._pos: V = pos
+        self._vel: V = vel
+        self._angle: float = None
+        self._angle_last: float = None
+        self._speed: float = None
         self.sprite = sprite
         self.acc = V()
         self.game = None
@@ -23,48 +30,64 @@ class Entity():
         self.friction = 0.0
         for k, v in kwargs.items():
             self.__setattr__(k, v)
-        self.pos_changed()
 
     @property
     def rect(self):
         return self.sprite.rect
 
     def check(self):
-        assert isinstance(self.dt, float)
-        assert isinstance(self.pos, V)
-        assert isinstance(self.vel, V)
+        assert isinstance(self._pos, V)
+        assert isinstance(self._vel, V)
         assert isinstance(self.acc, V)
-        return
-        if self.vel.x or self.vel.y:
-            if self.vel.x == self.vel.y:
-                print(f"check: {self}")
-                breakpoint()
+        assert isinstance(self.dt, float)
 
-    def pos_changed(self):
-        self.sprite.pos = self.pos
-        self.check()
-        # print(self)
-        return self
+    @property
+    def pos(self):
+        return self._pos
+
+    @pos.setter
+    def pos(self, pos: V):
+        self.sprite.pos = self._pos = pos
+
+    @property
+    def vel(self):
+        return self._vel
+
+    @vel.setter
+    def vel(self, vel: V):
+        self._vel = vel
+        self._speed = self._angle = None
 
     @property
     def speed(self):
-        return self.vel.norm()
+        if self._speed is None:
+            self._speed = self._vel.norm()
+        return self._speed
 
     @speed.setter
-    def set_speed(self, s: float):
-        self.vel = self.vel * self.normal() * s
+    def speed(self, s: float):
+        self._speed = self._angle = None
+        self._vel = self._vel.normal() * s
         return s
 
-    def get_pos(self):
-        return self.pos
-    def set_pos(self, pos):
-        self.pos = pos
-        return self.pos_changed()
-    def get_vel(self):
-        return self.vel
-    def set_vel(self, vel):
-        self.vel = vel
-        return self.pos_changed()
+    @property
+    def angle(self):
+        if self._angle is None:
+            if self.pos.x or self.pos.y:
+                self._angle_last = math.atan2(self.vel.y, self.vel.x) * DEGREE_PER_RADIAN
+            self._angle = self._angle_last
+        return self._angle
+
+    @angle.setter
+    def angle(self, angle: float):
+        rad = angle * RADIAN_PER_DEGREE
+        spd = self.speed
+        self.vel = V(math.cos(rad) * spd, math.sin(rad) * spd)
+        return angle
+
+    @property
+    def direction(self):
+        return self.vel.normal()
 
     def tick(self):
         self.tick_pos(self.dt)
@@ -82,7 +105,6 @@ class Entity():
         if self.max_speed:
             self.limit_speed(self.max_speed)
         self.pos += self.vel * dt
-        self.pos_changed()
 
     def limit_speed(self, max_speed):
         dir, speed = self.vel.normal_and_norm()
