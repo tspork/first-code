@@ -20,6 +20,7 @@ class Entity():
         self.game = None
         self.dt: Duration = 0.0
         self.max_speed: float = None
+        self.friction = 0.0
         for k, v in kwargs.items():
             self.__setattr__(k, v)
         self.pos_changed()
@@ -75,9 +76,11 @@ class Entity():
     def tick_pos(self, dt: Duration):
         # self.check()
         self.vel += self.acc * 0.99
+        self.acc = V() # V_0
+        if self.friction:
+            self.vel -= self.vel * (self.friction * dt)
         if self.max_speed:
             self.limit_speed(self.max_speed)
-        self.acc = V() # V_0
         self.pos += self.vel * dt
         self.pos_changed()
 
@@ -109,7 +112,7 @@ class Entity():
             return True
         return False
 
-    def repel_from(self, p, min_distance):
+    def repel_from_pos(self, p, min_distance):
         dp = self.pos - p
         dir, dist = dp.normal_and_norm()
         pen = min_distance - dist
@@ -118,6 +121,17 @@ class Entity():
             # print(f"repel_from: d={min_distance} dist={dist} pen={pen} force={force}")
             vel = dir * force * 3.0
             self.accelerate(vel)
+
+    def repel(self, other, min_distance):
+        dp = self.pos - other.pos
+        dir, dist = dp.normal_and_norm()
+        pen = min_distance - dist
+        if pen > 0:
+            force = min_distance / pen
+            force *= 0.99
+            vel = dir * force
+            self.accelerate(vel)
+            other.accelerate(- vel)
 
     def think(self):
         pass

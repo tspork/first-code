@@ -52,26 +52,26 @@ class Game():
         self.clock = pygame.time.Clock()
 
         # Player settings
-        self.player_width = 50
-        self.player_height = 60
-        self.player_speed = self.player_width * 10
+        self.player_size = V(50, 60)
+        self.player_thrust = self.player_size.x * 2.0
         self.player = self.make_player()
 
         # Bullet settings
-        self.bullet_width = 5
-        self.bullet_height = 10
-        self.bullet_speed = 7 * 50
+        self.bullet_size = V(5, 10)
+        self.bullet_speed = 7 * 100
+        self.bullets_max = 10
         self.bullets = []
 
         # Enemy settings
         self.enemy_width = 50
         self.enemy_height = 60
         self.enemy_speed = self.enemy_width * 1.0
+        self.enemies_max = 15
         self.enemies = []
 
         # Spawn an enemy every 2 seconds
         self.enemy_timer = 0
-        self.enemy_spawn_time = 2000
+        self.enemy_spawn_time = 4000
 
     #############################################################
 
@@ -126,11 +126,13 @@ class Game():
         # Spawn enemy:
         current_time = pygame.time.get_ticks()
         if current_time - self.enemy_timer > self.enemy_spawn_time:
-            enemy = self.make_enemy()
-            self.enemies.append(enemy)
-            self.enemy_timer = current_time
+            if len(self.enemies) < self.enemies_max:
+                enemy = self.make_enemy()
+                self.enemies.append(enemy)
+                self.enemy_timer = current_time
 
         # Update enemy positions and spawn new ones
+        self.enemies_avoid_each_other()
         for enemy in self.enemies:
             self.tick_entity(enemy)
             # enemy.think(dt)
@@ -147,6 +149,16 @@ class Game():
                     self.bullets.remove(bullet)
                     self.enemies.remove(enemy)
                     break
+
+    def enemies_avoid_each_other(self):
+        # moved = []
+        i = 0
+        for e1 in self.enemies:
+            i += 1
+            for e2 in self.enemies[i:]:
+                r = e2.sprite.width
+                e2.repel(e1, r)
+                # moved.append(e2)
 
     #############################################################
 
@@ -188,23 +200,20 @@ class Game():
                 vel.y -= player.quickness
             if keys[pygame.K_s]:
                 vel.y += player.quickness
-        player.vel = vel
+        player.accelerate(vel)
 
     def player_shoot(self, player):
         'Player shoots.'
-        bullet_x = player.pos.x
-        bullet_y = player.rect.top
-        bullet_color = (255, 255, 255)
-        bullet = Bullet(
-            V(bullet_x, bullet_y),
-            V(0.0, - self.bullet_speed),
-            Sprite(
-                V(self.bullet_width, self.bullet_height),
-                bullet_color,
-            ),
-            game=self,
-        )
+        if len(self.bullets) >= self.bullets_max:
+            return None
+        pos = V(player.pos.x, player.rect.top)
+        vel = V(0.0, - self.bullet_speed)
+        vel += V(0.0, player.vel.y * 0.5)
+        color = (255, 255, 255)
+        sprite = Sprite(self.bullet_size, color)
+        bullet = Bullet(pos, vel, sprite, game=self)
         self.bullets.append(bullet)
+        return bullet
 
     def tick_entity(self, entity):
         'Tick entity behavior.'
@@ -212,18 +221,18 @@ class Game():
         entity.tick()
 
     def make_player(self):
-        player_x = self.screen_width // 2 - self.player_width // 2
-        player_y = self.screen_height - self.player_height - 10
-        player_color = (0, 128, 255)
-        sprite = Sprite(
-            V(self.player_width, self.player_height),
-            player_color,
+        pos = V(
+            self.screen_width // 2 - self.player_size.x // 2,
+            self.screen_height - self.player_size.y - 10,
         )
+        vel = V()
+        color = (0, 128, 255)
+        sprite = Sprite(self.player_size, color)
         player = Player(
-            V(player_x, player_y),
-            V(0.0, 0.0),
-            sprite,
-            quickness=self.player_speed,
+            pos, vel, sprite,
+            quickness=self.player_thrust,
+            friction=7.0,
+            max_speed=500.0,
         )
         player.game = self
         return player
@@ -243,6 +252,7 @@ class Game():
             player=self.player,
             programs=self.make_enemy_programs(),
             max_speed=self.enemy_speed * 4,
+            friction=0.2,
             game=self,
         )
         return enemy

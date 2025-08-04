@@ -13,7 +13,6 @@ class Enemy(Entity):
     def tick(self):
         for cpu in self.cpus:
             cpu.tick(self.dt)
-        self.avoid_enemies()
         # if self.avoid_bullets():
 
     def tick_cpu(self, dt: Duration):
@@ -22,12 +21,6 @@ class Enemy(Entity):
     def think(self):
         'Change direction to player.'
         self.move_toward_player()
-
-    def avoid_enemies(self):
-        for enemy in self.game.enemies:
-            if enemy.id > self.id:
-                r = self.sprite.width
-                self.repel_from(enemy.pos, r)
 
     def avoid_bullets(self):
         # print(f"avoid_bullets: {self}")
