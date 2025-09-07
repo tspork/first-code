@@ -45,7 +45,13 @@ class Game():
         # Set up the game window
         self.screen_width = 800
         self.screen_height = 600
-        self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
+        flags = 0
+        # flags |= pygame.DOUBLEBUF | pygame.OPENGL
+        # flags |= pygame.RESIZABLE | pygame.SCALED
+        self.screen = pygame.display.set_mode(
+            (self.screen_width, self.screen_height),
+            flags,
+        )
         pygame.display.set_caption("Simple Shooter Game")
 
         # Set the frame rate
@@ -158,7 +164,6 @@ class Game():
             for e2 in self.enemies[i:]:
                 r = e2.sprite.width
                 e2.repel(e1, r)
-                # moved.append(e2)
 
     #############################################################
 
@@ -186,6 +191,7 @@ class Game():
         if not self.screen_bounds.contains(player.pos):
             player.pos = player_pos_
             player.vel = V()
+        # print(f"player={player}")
 
     def player_control(self, player):
         'Handle player movement.'
@@ -232,6 +238,7 @@ class Game():
             pos, vel, sprite,
             quickness=self.player_thrust,
             friction=7.0,
+            min_speed=0.0001,
             max_speed=500.0,
         )
         player.game = self
@@ -265,45 +272,47 @@ class Game():
                     # Accelerate random X direction:
                     ('const', V(-50.0, 0.0)),
                     ('const', V( 50.0, 0.0)),
-                    'rand',
-                    'acc',
+                    ('rand',),
+                    ('acc',),
                     ('const', 0.5),
-                    'sleep',
+                    ('sleep'),
 
                     # Accelerate random Y direction:
                     ('const', V(0.0, -50.0)),
                     ('const', V(0.0,  50.0)),
-                    'rand',
-                    'acc',
+                    ('rand',),
+                    ('acc',),
                     ('const', 0.5),
-                    'sleep',
+                    ('sleep'),
+                    ('repeat'),
                 ],
             ),
             Program(
                 'avoid_bullets',
                 [
                     ('const', V(0.1, 0.1)),
-                    # 'rand',
-                    'sleep',
+                    ('rand',),
+                    ('sleep',),
                     ('call', 'avoid_bullets'),
+                    ('repeat'),
                 ]
             ),
             Program(
                 'move_toward_player',
                 [
                     ('const', V(0.2, 0.9)),
-                    'rand',
-                    'sleep',
-
+                    ('rand'),
+                    ('sleep'),
                     ('const', 0.1),
-                    'sleep',
+                    ('sleep'),
                     ('call', 'move_toward_player'),
                     ('const', 0.1),
-                    'sleep',
+                    ('sleep'),
                     ('call', 'move_toward_player'),
                     ('const', 0.1),
-                    'sleep',
+                    ('sleep'),
                     ('call', 'move_toward_player'),
+                    ('repeat'),
                 ],
             ),
         ]

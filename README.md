@@ -8,15 +8,30 @@ https://dev.to/lovelacecoding/how-to-build-your-first-python-game-a-step-by-step
 
 ### Install pygame
 
-#### Create a place to install pygame and "activate" it:
+#### Create a place to install `pygame` and "activate" it
 
-```
+```bash
 $ python3 -m venv venv
+...
 $ . venv/bin/activate
+...
 ```
 
-#### Use pip to install pygame:
+#### Use pip to install `pygame`
 
-```
+```bash
 $ pip install pygame
+...
+```
+
+## Run games
+
+```bash
+$ python3 pygame/game-5.py
+...
+```
+
+```bash
+PYTHONPATH=lib python3 -m game
+...
 ```

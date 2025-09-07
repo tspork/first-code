@@ -1,13 +1,14 @@
 from cpu import Program, V, CPU
 
 prog = Program(
+    "test",
     [
         ('const', V(-5.0, -5.0)),
         ('const', V(5.0, 5.0)),
-        'rand',
-        'acc',
+        ('rand'),
+        ('acc'),
         ('const', 0.03),
-        'sleep',
+        ('sleep'),
     ]
 )
 

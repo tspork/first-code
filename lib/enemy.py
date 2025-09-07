@@ -5,14 +5,10 @@ from cpu import CPU
 class Enemy(Entity):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # self.player = kwargs['player']
-        # self.programs: list = kwargs['programs']
-        self.cpus: list = [CPU(self, prog) for prog in self.programs]
-        # print(f"cpus={self.cpus!r}")
+        self.cpu: CPU = CPU(self, self.programs)
 
     def tick(self):
-        for cpu in self.cpus:
-            cpu.tick(self.dt)
+        self.cpu.tick(self.dt)
         # if self.avoid_bullets():
 
     def tick_cpu(self, dt: Duration):
@@ -27,7 +23,7 @@ class Enemy(Entity):
         for bullet in self.game.bullets:
             # print(f"avoid_bullets: {bullet}")
             r0 = self.sprite.size.x
-            r1 = r0 * 2
+            r1 = r0 * 3
             if self.avoid_point(bullet.pos, r0, r1):
                 return True
         return False

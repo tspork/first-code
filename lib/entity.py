@@ -22,14 +22,23 @@ class Entity():
         self._angle: float = None
         self._angle_last: float = None
         self._speed: float = None
+        self._direction: V = None
+        self._direction_last: V = None
         self.sprite = sprite
         self.acc = V()
         self.game = None
         self.dt: Duration = 0.0
+        self.min_speed: float = None
         self.max_speed: float = None
         self.friction = 0.0
         for k, v in kwargs.items():
             self.__setattr__(k, v)
+
+    def __str__(self):
+        return self.__repr__()
+
+    def __repr__(self):
+        return f"{type(self).__name__}(id={self.id}, pos={self.pos}, vel={self.vel}, angle={self.angle}, acc={self.acc}, dt={self.dt})"
 
     @property
     def rect(self):
@@ -56,24 +65,12 @@ class Entity():
     @vel.setter
     def vel(self, vel: V):
         self._vel = vel
-        self._speed = self._angle = None
-
-    @property
-    def speed(self):
-        if self._speed is None:
-            self._speed = self._vel.norm()
-        return self._speed
-
-    @speed.setter
-    def speed(self, s: float):
-        self._speed = self._angle = None
-        self._vel = self._vel.normal() * s
-        return s
+        self._speed = self._angle = self._direction = None
 
     @property
     def angle(self):
         if self._angle is None:
-            if self.pos.x or self.pos.y:
+            if self.vel.x or self.vel.y:
                 self._angle_last = math.atan2(self.vel.y, self.vel.x) * DEGREE_PER_RADIAN
             self._angle = self._angle_last
         return self._angle
@@ -86,8 +83,34 @@ class Entity():
         return angle
 
     @property
+    def speed(self):
+        if self._speed is None:
+            self._direction_and_speed()
+        return self._speed
+
+    @speed.setter
+    def speed(self, s: float):
+        self.vel = self._vel.normal() * s
+        return s
+
+    @property
     def direction(self):
-        return self.vel.normal()
+        if self._direction is None:
+            self._direction_and_speed()
+        return self._direction
+
+    def _direction_and_speed(self):
+        if self.vel.x or self.vel.y:
+            self._direction_last, self._speed = self._vel.normal_and_norm()
+        else:
+            self._speed = 0
+        self._direction = self._direction_last
+
+    def accelerate(self, a: V):
+        assert isinstance(a, V)
+        self.acc += a
+
+    ###############################################
 
     def tick(self):
         self.tick_pos(self.dt)
@@ -102,18 +125,17 @@ class Entity():
         self.acc = V() # V_0
         if self.friction:
             self.vel -= self.vel * (self.friction * dt)
-        if self.max_speed:
-            self.limit_speed(self.max_speed)
+        if self.max_speed or self.min_speed:
+            self.limit_speed()
         self.pos += self.vel * dt
 
-    def limit_speed(self, max_speed):
-        dir, speed = self.vel.normal_and_norm()
-        if speed > max_speed:
-            self.vel = dir * max_speed
+    ###############################################
 
-    def accelerate(self, a: V):
-        assert isinstance(a, V)
-        self.acc += a
+    def limit_speed(self):
+        if self.max_speed and self.speed > self.max_speed:
+            self.vel = self.direction * self.max_speed
+        if self.min_speed and self.speed < self.min_speed:
+            self.vel = V()
 
     def set_vel(self, v: V):
         self.accelerate(v - self.vel)
@@ -160,10 +182,4 @@ class Entity():
 
     def draw(self, screen):
         self.sprite.draw(screen)
-
-    def __str__(self):
-        return self.__repr__()
-
-    def __repr__(self):
-        return f"{type(self).__name__}(id={self.id}, pos={self.pos}, vel={self.vel}, acc={self.acc}, dt={self.dt})"
 
