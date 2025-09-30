@@ -20,7 +20,11 @@ class Enemy(Entity):
 
     def avoid_bullets(self):
         # print(f"avoid_bullets: {self}")
-        for bullet in self.game.bullets:
+
+        def distance(bullet):
+            return (bullet.pos - self.pos).norm()
+
+        for bullet in sorted(self.game.bullets, key=distance):
             # print(f"avoid_bullets: {bullet}")
             r0 = self.sprite.size.x
             r1 = r0 * 3
