@@ -274,7 +274,7 @@ class Game():
                     ('const', V( 50.0, 0.0)),
                     ('rand',),
                     ('acc',),
-                    ('const', 0.5),
+                    ('const', 5.0),
                     ('sleep'),
 
                     # Accelerate random Y direction:
@@ -282,7 +282,7 @@ class Game():
                     ('const', V(0.0,  50.0)),
                     ('rand',),
                     ('acc',),
-                    ('const', 0.5),
+                    ('const', 3.0),
                     ('sleep'),
                     ('repeat'),
                 ],
@@ -290,7 +290,7 @@ class Game():
             Program(
                 'avoid_bullets',
                 [
-                    ('const', V(0.1, 0.1)),
+                    ('const', V(2.0, 2.0)),
                     ('rand',),
                     ('sleep',),
                     ('call', 'avoid_bullets'),
@@ -303,13 +303,13 @@ class Game():
                     ('const', V(0.2, 0.9)),
                     ('rand'),
                     ('sleep'),
-                    ('const', 0.1),
+                    ('const', 2.3),
                     ('sleep'),
                     ('call', 'move_toward_player'),
-                    ('const', 0.1),
+                    ('const', 3.3),
                     ('sleep'),
                     ('call', 'move_toward_player'),
-                    ('const', 0.1),
+                    ('const', 4.3),
                     ('sleep'),
                     ('call', 'move_toward_player'),
                     ('repeat'),

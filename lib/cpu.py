@@ -50,7 +50,7 @@ class Program:
                     result.append(('const', arg))
                 isn = (isn[0],)
             result.append(isn)
-        ic(result)
+        # ic(result)
         return result
 
 class State:
@@ -154,7 +154,7 @@ class Thread:
         self._args = isn
         opcode = isn[0]
         try:
-            print(f"{self.name} : {self._prog.name} : {self._ip} : {isn}")
+            # print(f"{self.name} : {self._prog.name} : {self._ip} : {isn}")
             if not isinstance(isn, tuple):
                 breakpoint()
             assert isinstance(isn, tuple)

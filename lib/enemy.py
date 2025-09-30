@@ -29,6 +29,7 @@ class Enemy(Entity):
             r0 = self.sprite.size.x
             r1 = r0 * 3
             if self.avoid_point(bullet.pos, r0, r1):
+                print(f"avoid_bullets: avoiding {bullet} {r0} {r1}")
                 return True
         return False
 
