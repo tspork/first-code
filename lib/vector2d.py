@@ -84,7 +84,7 @@ class Vector2D:
 
     def norm(self):
         'The norm (length).'
-        return math.sqrt(self.x ** 2 + self.y ** 2)
+        return math.sqrt(self.x * self.x + self.y * self.y)
 
     def normal_and_norm(self):
         norm = self.norm()
