@@ -16,14 +16,19 @@ def to_float(x):
     return float(x)
 
 
+thread_id = program_id = cpu_id = 0
+
 class Program:
     def __init__(self, name, isns = []):
+        global program_id
+        program_id += 1
+        self.id = program_id
         self.name = name
         self.isns = self.prepare_instructions(isns)
         self.labels = {}
 
     def __repr__(self):
-        return f"{type(self).__name__}({self.name!r})"
+        return f"{type(self).__name__}(id={self.id}, name={self.name!r})"
 
     __str__ = __repr__
 
@@ -64,6 +69,9 @@ class State:
 
 class CPU:
     def __init__(self, state, progs):
+        global cpu_id
+        cpu_id += 1
+        self.id = cpu_id
         self.state = state
         self.progs = progs
         self.thread_queue = []
@@ -108,6 +116,9 @@ class CPU:
 
 class Thread:
     def __init__(self, name, state, prog: Program):
+        global thread_id
+        thread_id += 1
+        self.id = thread_id
         self.name = name
         self.state = state
         self._prog: Program = prog
@@ -128,7 +139,7 @@ class Thread:
         return self.running and not self.halted
 
     def __repr__(self):
-        return f"{type(self).__name__} | state {self.state} | dt {self.dt} | isn {self._isn} | ip {self._ip} | stack {self._stack[-3:]!r} | wait {self._sleep}"
+        return f"{type(self).__name__} | id {self.id} | state {self.state} | dt {self.dt} | isn {self._isn} | ip {self._ip} | stack {self._stack[-3:]!r} | wait {self._sleep}"
 
     def tick(self, dt: Duration):
         self.dt, next_isn = self.sleep_(dt)
